@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>jQuery.scopeLinkTags</title>
+        <link rel="stylesheet" type="text/css" href="base.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>jQuery.scopeLinkTags</h1>
+
+            <section class="floatleft">
+                <div class="list">
+                    <div class="item">Item 1</div>
+                    <div class="item">Item 2</div>
+                    <div class="item">Item 3</div>
+                    <div class="item">Item 4</div>
+                    <div class="item">Item 5</div>
+                    <div class="item">Item 6</div>
+                </div>
+            </section>
+
+            <section class="scoped-section floatleft" style="margin-left: 20px;">
+                <link data-scoped rel="stylesheet" type="text/css" href="scoped.css">
+                <div class="list">
+                    <div class="item">Item 1</div>
+                    <div class="item">Item 2</div>
+                    <div class="item">Item 3</div>
+                    <div class="item">Item 4</div>
+                    <div class="item">Item 5</div>
+                    <div class="item">Item 6</div>
+                </div>
+            </section>
+
+            <div class="clear"></div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-2.2.4.js"></script>
+        <script src="../node_modules/jquery/dist/jquery.js"></script>
+        <script src="../src/jquery.scopeLinkTags.js"></script>
+        <script>
+        $(document).ready(function() {
+            $('body').scopeLinkTags();
+            // // or
+            // $('.scoped-section').scopeLinkTags();
+            // // or
+            // $('link[data-scoped]').scopeLinkTags();
+        });
+        </script>
+    </body>
+</html>

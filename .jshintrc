@@ -1,0 +1,28 @@
+{
+    "asi": false,
+    "bitwise": true,
+    "browser": true,
+    "curly": true,
+    "eqeqeq": true,
+    "eqnull": true,
+    "esnext": true,
+    "immed": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "nonew": true,
+    "quotmark": false,
+    "strict": false,
+    "trailing": false,
+    "undef": true,
+    "unused": true,
+
+    "validthis": true,
+
+    "globals": {
+      "console": true,
+      "$": true,
+      "jQuery": true,
+      "self": true
+    }
+}
