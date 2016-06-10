@@ -4,8 +4,16 @@
         defaults = {
             // http://stackoverflow.com/questions/12575845/what-is-the-regex-of-a-css-selector
             // http://regexr.com/328s7
-            cssRuleRegex: /(([^\r\n,{}]+)(,(?=[^}]*{)|\s*{))/g // /(^[a-zA-Z]*\.[\S])/g
+            cssRuleRegex: /(([^\r\n,{}]+)(,(?=[^}]*{)|\s*{))/g, // /(^[a-zA-Z]*\.[\S])/g
+            useScopedStyle: true,
+            useParentElementID: true,
+            scopeCssSelector: null
         };
+
+    function scopeCss (css, scopeSelector, cssRuleRegex) {
+        cssRuleRegex = cssRuleRegex || defaults.cssRuleRegex;
+        return css.replace(cssRuleRegex, scopeSelector + ' $1');
+    }
 
     function Plugin(element, options) {
         this.element = element;
@@ -35,15 +43,26 @@
                 var $parent = $element.parent();
 
                 var $scopedStyleTag = $('<style>').data('scoped-link-href', linkHref);
-                if ('scoped' in $scopedStyleTag[0]) {
+                if (options.useScopedStyle &&
+                    !options.scopeCssSelector &&
+                    'scoped' in $scopedStyleTag[0]) {
+
                     $scopedStyleTag.prop('scoped', true);
                     $scopedStyleTag.html(css);
                 } else {
+                    var scopeSelector = '';
                     var parentID = $parent.attr('id');
-                    var parentSelector = parentID ?
-                        '#' + parentID :
-                        '.' + $.grep($parent.attr('class').split(' '), function(x){ return !!x; }).join('.');
-                    var scopedCss = scopeCss(css, parentSelector, options.cssRuleRegex);
+                    if (options.scopeCssSelector) {
+                        scopeSelector = options.scopeCssSelector;
+                    } else if (parentID && options.useScopedStyle) {
+                        scopeSelector = parentID;
+                    } else {
+                        scopeSelector = '.' + $.grep($parent.attr('class').split(' '), function(x){ return !!x; }).join('.');
+                    }
+
+                    $scopedStyleTag.data('scope-css-selector', scopeSelector);
+
+                    var scopedCss = scopeCss(css, scopeSelector, options.cssRuleRegex);
 
                     $scopedStyleTag.html(scopedCss);
                 }
@@ -67,13 +86,10 @@
             });
             $link.insertBefore(this.$element);
             $.removeData(this.element, pluginName);
+            $.removeData(this.element, 'scoped-link-href');
+            $.removeData(this.element, 'scope-css-selector');
         }
     };
-
-    function scopeCss (css, scopeSelector, cssRuleRegex) {
-        cssRuleRegex = cssRuleRegex || defaults.cssRuleRegex;
-        return css.replace(cssRuleRegex, scopeSelector + ' $1');
-    }
 
     $.fn[pluginName] = function (options) {
         var result,
