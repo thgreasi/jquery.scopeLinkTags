@@ -33,18 +33,30 @@
             </section>
 
             <div class="clear"></div>
+            <button id="destroyBtn" type="button">Toggle Scoped Link Tags</button>
         </div>
 
         <script src="http://code.jquery.com/jquery-2.2.4.js"></script>
-        <script src="../node_modules/jquery/dist/jquery.js"></script>
+        <!-- <script src="../node_modules/jquery/dist/jquery.js"></script> -->
         <script src="../src/jquery.scopeLinkTags.js"></script>
         <script>
         $(document).ready(function() {
+            console.log('Scoping');
             $('body').scopeLinkTags();
             // // or
             // $('.scoped-section').scopeLinkTags();
             // // or
             // $('link[data-scoped]').scopeLinkTags();
+
+            $('#destroyBtn').on('click', function () {
+                if ($('body link').length) {
+                    console.log('Scoping');
+                    $('body').scopeLinkTags();
+                } else {
+                    console.log('Reverting');
+                    $('body').scopeLinkTags('destroy');
+                }
+            });
         });
         </script>
     </body>
