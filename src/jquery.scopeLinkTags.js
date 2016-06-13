@@ -1,6 +1,6 @@
 ;(function ($, window, document, undefined) {
 
-    var pluginName = "scopeLinkTags",
+    var pluginName = 'scopeLinkTags',
         defaults = {
             // http://stackoverflow.com/questions/12575845/what-is-the-regex-of-a-css-selector
             // http://regexr.com/328s7
@@ -17,7 +17,6 @@
 
     function Plugin(element, options) {
         this.element = element;
-        this.$element = $(element);
 
         this.options = $.extend({}, defaults, options);
 
@@ -30,8 +29,9 @@
     Plugin.prototype = {
 
         init: function () {
+            var that = this;
             var options = this.options;
-            var $element = this.$element;
+            var $element = $(this.element);
 
             var linkHref = $element.attr('href');
             var linkCssPromise = $.ajax({
@@ -42,7 +42,9 @@
 
                 var $parent = $element.parent();
 
-                var $scopedStyleTag = $('<style>').data('scoped-link-href', linkHref);
+                var $scopedStyleTag = $('<style>').data('scoped-link-href', linkHref)
+                    .data('plugin_' + pluginName, that);
+
                 if (options.useScopedStyle &&
                     !options.scopeCssSelector &&
                     'scoped' in $scopedStyleTag[0]) {
@@ -57,7 +59,7 @@
                     } else if (parentID && options.useScopedStyle) {
                         scopeSelector = parentID;
                     } else {
-                        scopeSelector = '.' + $.grep($parent.attr('class').split(' '), function(x){ return !!x; }).join('.');
+                        scopeSelector = 'jQuery-' + pluginName + '-' + $.guid++;
                     }
 
                     $scopedStyleTag.data('scope-css-selector', scopeSelector);
@@ -69,6 +71,8 @@
 
                 $scopedStyleTag.insertBefore($element);
                 $element.remove();
+                that.element = null;
+                that.styleTag = $scopedStyleTag[0];
             }).then(null, function (error) {
                 if (typeof console !== 'undefined' && typeof console.log === 'function') {
                     console.log('Clould not load '+ linkHref, error);
@@ -77,17 +81,20 @@
         },
 
         destroy: function () {
+            var $styleTag = $(this.styleTag);
             // Place logic that completely removes
             // the plugin's functionality
-            var $link = $('link').attr({
-                'href': this.$element.data('scoped-link-href'),
+            var $link = $('<link>').attr({
+                'href': $styleTag.data('scoped-link-href'),
                 'rel': 'stylesheet',
                 'type': 'text/css'
             });
-            $link.insertBefore(this.$element);
-            $.removeData(this.element, pluginName);
-            $.removeData(this.element, 'scoped-link-href');
-            $.removeData(this.element, 'scope-css-selector');
+            $link.insertBefore(this.styleTag);
+            $styleTag.remove();
+            $.removeData(this.styleTag, 'plugin_' + pluginName);
+            $.removeData(this.styleTag, 'scoped-link-href');
+            $.removeData(this.styleTag, 'scope-css-selector');
+            this.styleTag = null;
         }
     };
 
@@ -95,24 +102,28 @@
         var result,
             restArgs = Array.prototype.slice.call(arguments, 1);
 
-        var CSS_LINK_SELECTOR = 'link[type="text/css"]'; // [rel="stylesheet" ]
+        var STYLE_TAG_SELECTOR = 'style';
+        var CSS_LINK_SELECTOR = 'link[type="text/css"]'; // [rel='stylesheet' ]
 
-        var $filteredElements = this.filter(CSS_LINK_SELECTOR);
+        var $filteredStyleElements = this.filter(STYLE_TAG_SELECTOR);
+        var $filteredLinkElements = this.filter(CSS_LINK_SELECTOR);
 
-        var $links = $filteredElements.length ?
-            $filteredElements :
-            this.find(CSS_LINK_SELECTOR);
+        var $links = $filteredLinkElements.length ?
+            $filteredLinkElements :
+            $filteredStyleElements.length ?
+            $filteredStyleElements :
+            this.find(CSS_LINK_SELECTOR + ', ' + STYLE_TAG_SELECTOR);
 
         $links.each(function () {
-            var instance = $.data(this, "plugin_" + pluginName);
-            if (!instance) {
+            var $this = $(this);
+            var instance = $.data(this, 'plugin_' + pluginName);
+            if (!instance && $this.is(CSS_LINK_SELECTOR)) {
                 instance = new Plugin(this, options);
-                $.data(this, "plugin_" + pluginName, instance);
 
                 // When the first argument matches the name of a method
-            } else if (typeof options === "string" && // method name
-                options[0] !== "_" && // protect private methods
-                typeof instance[options] === "function") {
+            } else if (instance && typeof options === 'string' && // method name
+                options[0] !== '_' && // protect private methods
+                typeof instance[options] === 'function') {
 
                 // invoke the method with the rest arguments
                 result = instance[options].apply(instance, restArgs);
