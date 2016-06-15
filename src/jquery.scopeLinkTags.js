@@ -2,9 +2,7 @@
 
     var pluginName = 'scopeLinkTags',
         defaults = {
-            // http://stackoverflow.com/questions/12575845/what-is-the-regex-of-a-css-selector
-            // http://regexr.com/328s7
-            cssRuleRegex: /(([^\r\n,{}]+)(,(?=[^}]*{)|\s*{))/g, // /(^[a-zA-Z]*\.[\S])/g
+            cssRuleRegex: /(([^\r\n,{}]+)(,(?=[^}]*{)|\s*{))/g, // http://regexr.com/328s7
             useScopedStyle: true,
             useParentElementID: true,
             scopeCssSelector: null
@@ -42,8 +40,9 @@
 
                 var $parent = $element.parent();
 
-                var $scopedStyleTag = $('<style>').data('scoped-link-href', linkHref)
-                    .data('plugin_' + pluginName, that);
+                var $scopedStyleTag = $('<style>').data(pluginName, that);
+                that.scopedLinkHref = linkHref;
+
 
                 if (options.useScopedStyle &&
                     !options.scopeCssSelector &&
@@ -54,15 +53,19 @@
                 } else {
                     var scopeSelector = '';
                     var parentID = $parent.attr('id');
+
+                    // user defined ancestor element selector
                     if (options.scopeCssSelector) {
                         scopeSelector = options.scopeCssSelector;
                     } else if (parentID && options.useScopedStyle) {
                         scopeSelector = parentID;
                     } else {
                         scopeSelector = 'jQuery-' + pluginName + '-' + $.guid++;
+                        $parent.addClass(scopeSelector);
+                        that.scopeSelectorAdded = scopeSelector;
                     }
 
-                    $scopedStyleTag.data('scope-css-selector', scopeSelector);
+                    that.scopeCssSelector = scopeSelector;
 
                     var scopedCss = scopeCss(css, scopeSelector, options.cssRuleRegex);
 
@@ -85,15 +88,18 @@
             // Place logic that completely removes
             // the plugin's functionality
             var $link = $('<link>').attr({
-                'href': $styleTag.data('scoped-link-href'),
+                'href': this.scopedLinkHref,
                 'rel': 'stylesheet',
                 'type': 'text/css'
             });
             $link.insertBefore(this.styleTag);
             $styleTag.remove();
-            $.removeData(this.styleTag, 'plugin_' + pluginName);
-            $.removeData(this.styleTag, 'scoped-link-href');
-            $.removeData(this.styleTag, 'scope-css-selector');
+
+            if (this.scopeSelectorAdded) {
+                $styleTag.parent().removeClass(this.scopeSelectorAdded);
+            }
+
+            $.removeData(this.styleTag, pluginName);
             this.styleTag = null;
         }
     };
@@ -116,7 +122,7 @@
 
         $links.each(function () {
             var $this = $(this);
-            var instance = $.data(this, 'plugin_' + pluginName);
+            var instance = $.data(this, pluginName);
             if (!instance && $this.is(CSS_LINK_SELECTOR)) {
                 instance = new Plugin(this, options);
 
