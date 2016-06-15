@@ -1,5 +1,5 @@
 {
-  "name": "jquery.scopelinktags",
+  "name": "jquery-scopelinktags",
   "version": "0.9.0",
   "description": "A jQuery plugin that scopes the CSS rules of <link> tags",
   "main": "./src/jquery.scopeLinkTags.js",
