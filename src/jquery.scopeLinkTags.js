@@ -104,26 +104,35 @@
         }
     };
 
+    var selectorDefaults = {
+        styleTagSelector: 'style',
+        cssLinkSelector: 'link[type="text/css"]' // [rel='stylesheet' ]
+    };
+
     $.fn[pluginName] = function (options) {
         var result,
             restArgs = Array.prototype.slice.call(arguments, 1);
 
-        var STYLE_TAG_SELECTOR = 'style';
-        var CSS_LINK_SELECTOR = 'link[type="text/css"]'; // [rel='stylesheet' ]
+        
+        var selectorOptions = $.extend({}, selectorDefaults, options);
 
-        var $filteredStyleElements = this.filter(STYLE_TAG_SELECTOR);
-        var $filteredLinkElements = this.filter(CSS_LINK_SELECTOR);
+        var $filteredLinkElements = this.filter(selectorOptions.cssLinkSelector);
+        var $filteredStyleElements = this.filter(selectorOptions.styleTagSelector);
+        var allCssTagSelector = [
+            selectorOptions.cssLinkSelector,
+            selectorOptions.styleTagSelector
+        ].join(', ');
 
         var $links = $filteredLinkElements.length ?
             $filteredLinkElements :
             $filteredStyleElements.length ?
             $filteredStyleElements :
-            this.find(CSS_LINK_SELECTOR + ', ' + STYLE_TAG_SELECTOR);
+            this.find(allCssTagSelector);
 
         $links.each(function () {
             var $this = $(this);
             var instance = $.data(this, pluginName);
-            if (!instance && $this.is(CSS_LINK_SELECTOR)) {
+            if (!instance && $this.is(allCssTagSelector)) {
                 instance = new Plugin(this, options);
 
                 // When the first argument matches the name of a method
