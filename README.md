@@ -23,6 +23,14 @@ $('link[data-scoped]').scopeLinkTags();
 ## Options
 The `scopeLinkTags()` method optionally accepts an object with the following parameters:
 
+### styleTagSelector
+Type: [String](http://api.jquery.com/Types/#String) (Default: `'style'`)  
+Can be used to change the selector used to find the `<style>` tags.
+
+### cssLinkSelector
+Type: [String](http://api.jquery.com/Types/#String) (Default: `'link[type="text/css"]'`)  
+Can be used to change the selector used to find the `<link>` tags.
+
 ### cssRuleRegex
 Type: [Regex](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)  
 Can be used to change the Regex that is used to detect each separate CSS selector.
