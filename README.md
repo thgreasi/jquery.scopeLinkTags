@@ -3,6 +3,8 @@ jQuery ScopeLinkTags plugin
 This plugin provides a way to scope CSS `<link>` tags inside their container, similarly to the way that [scoped `<style>` tags work](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#attr-scoped).
 Initially inspired by [this stackoverflow response](http://stackoverflow.com/a/12578281/1206668) and [thingsinjars/jQuery-Scoped-CSS-plugin](https://github.com/thingsinjars/jQuery-Scoped-CSS-plugin).
 
+**Note:** you should only have to use this approach in case that you can't control the imported CSS file. If you can use SASS/LESS/anything to pre-process your CSS, you should prefer that.
+
 # Installation
 
 `npm install jquery-scopelinktags`
